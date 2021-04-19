@@ -134,5 +134,4 @@ geo = json.load(open("centres_vaccination.json"))
 #sauvegarde dans un fichier index.hatml
 m.save("index.html")
 
-
 m
