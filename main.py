@@ -1,27 +1,23 @@
 import os.path
 import folium
 import json
+
 from branca.element import Template, MacroElement
 
-with open('centres_vaccination.json') as access_json:
-    read_content = json.load(access_json)
-
-feature_access = read_content['features']
-
 # création map centrée sur la France métropolitaine
-m = folium.Map(location=[46.6211319,2.1605771],
-           zoom_start=7,
-           tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-           attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors')
+m = folium.Map(location=[46.6211319, 2.1605771],
+               zoom_start=7,
+               tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+               attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors')
 
 # rattachement du fichier json à folium
 nodeData = os.path.join('centres_vaccination.json')
 
-file= "./centres_vaccination.json"
+file = "./centres_vaccination.json"
 
 g = folium.GeoJson(
-   file,
-   name="centres_vaccination"
+    file,
+    name="centres_vaccination"
 ).add_to(m)
 
 # reading JSON file
@@ -30,17 +26,25 @@ with open('centres_vaccination.json') as access_json:
 
 feature_access = read_content['features']
 
-#essayer de faire apparaitre certaines informations dans le popup : echec
-for feature_data in feature_access:
-            buildingName = feature_data['properties']
-            feature_data = ['c_nom']
- #création d'un popup quand on clique sur le marker
+feature_group = folium.FeatureGroup(name='popup')
+
+# création d'un popup quand on clique sur le marker
 geo_json = folium.GeoJson(nodeData)
-geo_json.add_child(folium.Popup(str("hello world!")))
+
+# Faire apparaitre certaines informations nom du centre dans le popup, pour chaque ligne on prend le champ properties
+# et on prend la propriété 'c_nom'
+for feature_data in feature_access:
+    buildingName = feature_data['properties']
+    c_nom = buildingName['c_nom']
+    geo_json.add_child(folium.Popup(str(c_nom)))
+
+#le popup correspond à la dernière entrée du Json, j'ai essayé d'utiliser la nouvelle fonction GeoJson Popup mais
+#il n'y a rien qui s'affiche
+#geo_json = folium.GeoJson(nodeData, popup=folium.GeoJsonPopup(["c_nom"]))
 
 geo_json.add_to(m)
 
-#rajout d'un encart pour illustrer la map
+# rajout d'un encart pour illustrer la map
 template = """
 {% macro html(this, kwargs) %}
 <!doctype html>
@@ -73,7 +77,8 @@ template = """
     style='position: absolute; z-index:9999; border:2px solid grey; background-color:rgba(255, 255, 255, 0.8);
      border-radius:6px; padding: 10px; font-size:14px; right: 20px; bottom: 20px;'>
 
-<div class='legend-title'>Carte des centres de vaccinations contre le covid 19<br> en France métropolitaine et territoires d'outre-mer </div>
+<div class='legend-title'>Carte des centres de vaccinations contre le covid 19<br> en France métropolitaine et 
+territoires d'outre-mer </div>
 <div class='legend-scale'>
 
 </div>
@@ -129,9 +134,5 @@ m.get_root().add_child(macro)
 
 geo_json.add_to(m)
 
-geo = json.load(open("centres_vaccination.json"))
-
-#sauvegarde dans un fichier index.hatml
+# sauvegarde dans un fichier index.hatml
 m.save("index.html")
-
-m
