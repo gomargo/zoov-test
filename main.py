@@ -8,11 +8,13 @@ with open('centres_vaccination.json') as access_json:
 
 feature_access = read_content['features']
 
+# création map centrée sur la France métropolitaine
 m = folium.Map(location=[46.6211319,2.1605771],
            zoom_start=7,
            tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
            attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors')
 
+# rattachement du fichier json à folium
 nodeData = os.path.join('centres_vaccination.json')
 
 file= "./centres_vaccination.json"
@@ -28,15 +30,17 @@ with open('centres_vaccination.json') as access_json:
 
 feature_access = read_content['features']
 
+#essayer de faire apparaitre certaines informations dans le popup : echec
 for feature_data in feature_access:
             buildingName = feature_data['properties']
             feature_data = ['c_nom']
-
+ #création d'un popup quand on clique sur le marker
 geo_json = folium.GeoJson(nodeData)
 geo_json.add_child(folium.Popup(str("hello world!")))
 
 geo_json.add_to(m)
 
+#rajout d'un encart pour illustrer la map
 template = """
 {% macro html(this, kwargs) %}
 <!doctype html>
@@ -127,6 +131,7 @@ geo_json.add_to(m)
 
 geo = json.load(open("centres_vaccination.json"))
 
+#sauvegarde dans un fichier index.hatml
 m.save("index.html")
 
 
